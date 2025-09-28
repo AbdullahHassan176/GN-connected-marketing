@@ -19,6 +19,7 @@ export interface JWTPayload {
   status: 'active' | 'inactive' | 'suspended';
   iat: number;
   exp: number;
+  [key: string]: any;
 }
 
 /**
@@ -67,7 +68,7 @@ export async function createToken(user: AuthUser): Promise<string> {
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as JWTPayload;
+    return payload as unknown as JWTPayload;
   } catch (error) {
     return null;
   }

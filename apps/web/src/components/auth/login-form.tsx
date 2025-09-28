@@ -5,18 +5,18 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@repo/ui';
 import { useTranslations } from 'next-intl';
+import { useAuthWorkflow } from '@/hooks/useWorkflow';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
   const t = useTranslations('auth');
+  const { login, isLoading } = useAuthWorkflow();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
 
     try {
@@ -29,12 +29,11 @@ export function LoginForm() {
       if (result?.error) {
         setError(t('errors.invalid_credentials'));
       } else {
-        router.push('/dashboard');
+        // Use workflow for login
+        await login(email, password);
       }
     } catch (error) {
       setError(t('errors.something_went_wrong'));
-    } finally {
-      setIsLoading(false);
     }
   };
 

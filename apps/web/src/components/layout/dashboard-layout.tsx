@@ -9,7 +9,7 @@ import {
   Headphones, 
   Globe, 
   BarChart3, 
-  Bullhorn, 
+  Megaphone, 
   Bot, 
   MessageSquare, 
   FileText,
@@ -28,7 +28,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const navigation = [
     { name: t('dashboard'), href: '/dashboard', icon: BarChart3, current: true },
-    { name: t('campaigns'), href: '/campaigns', icon: Bullhorn, current: false },
+    { name: t('campaigns'), href: '/campaigns', icon: Megaphone, current: false },
     { name: t('ai_tools'), href: '/tools', icon: Bot, current: false },
     { name: t('analytics'), href: '/analytics', icon: BarChart3, current: false },
     { name: t('campaign_rooms'), href: '/rooms', icon: MessageSquare, current: false },

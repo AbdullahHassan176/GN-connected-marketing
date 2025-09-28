@@ -11,10 +11,10 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0",
+    "@azure/functions": "^3.0.0",
     "@azure/cosmos": "^4.0.0",
-    "@azure/identity": "^3.5.0",
-    "@repo/lib": "workspace:*",
+    "@azure/identity": "^3.0.0",
+    "@repo/lib": "file:../../packages/lib",
     "zod": "^3.22.0",
     "jose": "^5.1.0",
     "bcryptjs": "^2.4.3",

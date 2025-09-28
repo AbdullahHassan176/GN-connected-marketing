@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
-import MicrosoftProvider from 'next-auth/providers/microsoft';
+// import MicrosoftProvider from 'next-auth/providers/microsoft';
 
 // Demo users for development
 const demoUsers = [
@@ -12,8 +12,8 @@ const demoUsers = [
     name: 'Sarah Mitchell',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org', scopeId: 'org_123', role: 'owner' }],
-    status: 'active',
+    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'owner' as const }],
+    status: 'active' as const,
   },
   {
     id: 'user_manager',
@@ -22,8 +22,8 @@ const demoUsers = [
     name: 'Marcus Chen',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org', scopeId: 'org_123', role: 'manager' }],
-    status: 'active',
+    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'manager' as const }],
+    status: 'active' as const,
   },
   {
     id: 'user_client',
@@ -32,8 +32,8 @@ const demoUsers = [
     name: 'Ahmed Al-Rashid',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org', scopeId: 'org_123', role: 'client' }],
-    status: 'active',
+    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'client' as const }],
+    status: 'active' as const,
   },
 ];
 
@@ -74,11 +74,11 @@ const handler = NextAuth({
       clientId: process.env.OAUTH_GOOGLE_ID || '',
       clientSecret: process.env.OAUTH_GOOGLE_SECRET || '',
     }),
-    MicrosoftProvider({
-      clientId: process.env.OAUTH_MICROSOFT_ID || '',
-      clientSecret: process.env.OAUTH_MICROSOFT_SECRET || '',
-      tenantId: 'common',
-    }),
+    // MicrosoftProvider({
+    //   clientId: process.env.OAUTH_MICROSOFT_ID || '',
+    //   clientSecret: process.env.OAUTH_MICROSOFT_SECRET || '',
+    //   tenantId: 'common',
+    // }),
   ],
   callbacks: {
     async jwt({ token, user, account }) {
@@ -94,7 +94,7 @@ const handler = NextAuth({
         session.user.id = token.sub!;
         session.user.orgId = token.orgId as string;
         session.user.roles = token.roles as any[];
-        session.user.status = token.status as string;
+        session.user.status = token.status as 'active' | 'inactive' | 'suspended';
       }
       return session;
     },

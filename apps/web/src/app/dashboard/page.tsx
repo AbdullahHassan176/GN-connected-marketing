@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { DashboardContent } from '@/components/dashboard/dashboard-content';
+import { DashboardContentWorkflow } from '@/components/dashboard/dashboard-content-workflow';
 
 export default async function DashboardPage() {
   const session = await getServerSession();
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <DashboardContent />
+      <DashboardContentWorkflow />
     </DashboardLayout>
   );
 }
