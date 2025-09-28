@@ -1,0 +1,22 @@
+module.exports = {
+  extends: [
+    "next/core-web-vitals",
+    "prettier"
+  ],
+  parser: "@typescript-eslint/parser",
+  plugins: ["@typescript-eslint"],
+  rules: {
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "prefer-const": "error",
+    "no-var": "error"
+  },
+  overrides: [
+    {
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      env: {
+        jest: true
+      }
+    }
+  ]
+};
