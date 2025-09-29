@@ -26,15 +26,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const t = useTranslations('navigation');
 
+  // Role-aware navigation
+  const user = session?.user as any;
+  const userRoles = user?.roles?.map((role: any) => role.role) || [];
+
   const navigation = [
-    { name: t('dashboard'), href: '/dashboard', icon: BarChart3, current: true },
-    { name: t('campaigns'), href: '/campaigns', icon: Megaphone, current: false },
-    { name: t('ai_tools'), href: '/tools', icon: Bot, current: false },
-    { name: t('analytics'), href: '/analytics', icon: BarChart3, current: false },
-    { name: t('campaign_rooms'), href: '/rooms', icon: MessageSquare, current: false },
-    { name: t('reports'), href: '/reports', icon: FileText, current: false },
-    { name: t('brand_journey'), href: '/journey', icon: Route, current: false },
-  ];
+    { name: t('dashboard'), href: '/dashboard', icon: BarChart3, current: true, roles: ['client', 'analyst', 'manager', 'admin', 'owner'] },
+    { name: t('projects'), href: '/projects', icon: Megaphone, current: false, roles: ['analyst', 'manager', 'admin', 'owner'] },
+    { name: t('ai_tools'), href: '/tools', icon: Bot, current: false, roles: ['analyst', 'manager', 'admin', 'owner'] },
+    { name: t('analytics'), href: '/analytics', icon: BarChart3, current: false, roles: ['analyst', 'manager', 'admin', 'owner'] },
+    { name: t('campaign_rooms'), href: '/rooms', icon: MessageSquare, current: false, roles: ['client', 'analyst', 'manager', 'admin', 'owner'] },
+    { name: t('reports'), href: '/reports', icon: FileText, current: false, roles: ['analyst', 'manager', 'admin', 'owner'] },
+    { name: t('brand_journey'), href: '/journey', icon: Route, current: false, roles: ['client', 'analyst', 'manager', 'admin', 'owner'] },
+  ].filter(item => {
+    if (!user?.roles) return false;
+    return item.roles.some(role => userRoles.includes(role));
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,6 +61,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           
           <div className="flex items-center space-x-6">
+            {/* User Role Indicator */}
+            {user?.roles && (
+              <div className="bg-white/10 rounded-full px-3 py-1">
+                <span className="text-sm font-medium text-white">
+                  {userRoles.includes('owner') ? 'Owner' : 
+                   userRoles.includes('admin') ? 'Admin' : 
+                   userRoles.includes('manager') ? 'Manager' : 
+                   userRoles.includes('analyst') ? 'Analyst' : 'Client'}
+                </span>
+              </div>
+            )}
             <Button variant="ghost" size="sm" className="text-blue-200 hover:text-white">
               <Bell className="w-4 h-4 mr-2" />
               <span className="hidden md:block">{t('common.notifications')}</span>

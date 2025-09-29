@@ -1,432 +1,362 @@
-import { initializeDatabase, getContainer, CONTAINERS } from '../src/db';
-import { generateOrgId, generateUserId, generateProjectId } from '../src/auth';
 import { nanoid } from 'nanoid';
 
-async function seedDatabase() {
-  console.log('🌱 Starting database seeding...');
-  
-  try {
-    // Initialize database and containers
-    await initializeDatabase();
-    console.log('✅ Database initialized');
-
-    // Create demo organization
-    const orgId = generateOrgId();
-    const organization = {
-      id: orgId,
-      orgId: orgId,
-      type: 'organization',
-      name: 'Global Next Consulting',
-      domains: ['globalnextconsulting.com'],
-      settings: {
-        billingPlan: 'pro' as const,
-        locale: 'en' as const,
-        rtl: false,
+// Demo organizations
+const organizations = [
+  {
+    id: 'org_123',
+    name: 'Global Next Consulting',
+    description: 'AI-powered marketing consulting firm',
+    industry: 'Marketing & Advertising',
+    website: 'https://globalnextconsulting.com',
+    logoUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/logos/global-next-logo.png',
+    settings: {
+      timezone: 'UTC',
+      currency: 'USD',
+      language: 'en',
+      features: {
+        aiInsights: true,
+        advancedAnalytics: true,
+        teamCollaboration: true,
+        customBranding: true,
       },
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    },
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+  },
+];
 
-    await getContainer(CONTAINERS.ORGANIZATIONS).items.create(organization);
-    console.log('✅ Organization created');
+// Demo projects
+const projects = [
+  {
+    id: 'proj_456',
+    name: 'Premium Hotels Campaign',
+    description: 'Luxury hospitality marketing campaign for premium hotel chain',
+    orgId: 'org_123',
+    status: 'active',
+    startDate: new Date('2024-01-15'),
+    endDate: new Date('2024-06-15'),
+    budget: 125000,
+    spent: 78000,
+    teamSize: 8,
+    progress: 78,
+    tags: ['luxury', 'hospitality', 'premium'],
+    settings: {
+      notifications: true,
+      reporting: 'weekly',
+      collaboration: 'team',
+    },
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'proj_789',
+    name: 'Tech Startup Launch',
+    description: 'Digital marketing strategy for emerging tech startup',
+    orgId: 'org_123',
+    status: 'planning',
+    startDate: new Date('2024-02-01'),
+    endDate: new Date('2024-08-01'),
+    budget: 75000,
+    spent: 12000,
+    teamSize: 5,
+    progress: 15,
+    tags: ['tech', 'startup', 'digital'],
+    settings: {
+      notifications: true,
+      reporting: 'bi-weekly',
+      collaboration: 'team',
+    },
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date(),
+  },
+];
 
-    // Create demo users
-    const adminUserId = generateUserId();
-    const managerUserId = generateUserId();
-    const clientUserId = generateUserId();
-
-    const users = [
-      {
-        id: adminUserId,
-        type: 'user',
-        orgId: orgId,
-        email: 'admin@globalnextconsulting.com',
-        name: 'Sarah Mitchell',
-        avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg',
-        provider: 'credentials' as const,
-        roles: [
-          { scope: 'org' as const, scopeId: orgId, role: 'owner' as const },
-        ],
-        status: 'active' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+// Demo users with different roles
+const users = [
+  {
+    id: 'user_admin',
+    email: 'admin@globalnextconsulting.com',
+    password: 'admin123',
+    name: 'Sarah Mitchell',
+    avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg',
+    orgId: 'org_123',
+    roles: [
+      { scope: 'org', scopeId: 'org_123', role: 'owner' },
+      { scope: 'project', scopeId: 'proj_456', role: 'admin' },
+      { scope: 'project', scopeId: 'proj_789', role: 'admin' },
+    ],
+    status: 'active',
+    preferences: {
+      theme: 'light',
+      language: 'en',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
       },
-      {
-        id: managerUserId,
-        type: 'user',
-        orgId: orgId,
-        email: 'manager@globalnextconsulting.com',
-        name: 'Marcus Chen',
-        avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg',
-        provider: 'google' as const,
-        roles: [
-          { scope: 'org' as const, scopeId: orgId, role: 'manager' as const },
-        ],
-        status: 'active' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    },
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'user_manager',
+    email: 'manager@globalnextconsulting.com',
+    password: 'manager123',
+    name: 'Marcus Chen',
+    avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg',
+    orgId: 'org_123',
+    roles: [
+      { scope: 'org', scopeId: 'org_123', role: 'manager' },
+      { scope: 'project', scopeId: 'proj_456', role: 'manager' },
+      { scope: 'project', scopeId: 'proj_789', role: 'manager' },
+    ],
+    status: 'active',
+    preferences: {
+      theme: 'dark',
+      language: 'en',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
       },
-      {
-        id: clientUserId,
-        type: 'user',
-        orgId: orgId,
-        email: 'ahmed@premiumhotels.com',
-        name: 'Ahmed Al-Rashid',
-        avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg',
-        provider: 'microsoft' as const,
-        roles: [
-          { scope: 'org' as const, scopeId: orgId, role: 'client' as const },
-        ],
-        status: 'active' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+    },
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'user_analyst',
+    email: 'analyst@globalnextconsulting.com',
+    password: 'analyst123',
+    name: 'Emma Rodriguez',
+    avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg',
+    orgId: 'org_123',
+    roles: [
+      { scope: 'org', scopeId: 'org_123', role: 'analyst' },
+      { scope: 'project', scopeId: 'proj_456', role: 'analyst' },
+      { scope: 'project', scopeId: 'proj_789', role: 'analyst' },
+    ],
+    status: 'active',
+    preferences: {
+      theme: 'light',
+      language: 'en',
+      notifications: {
+        email: true,
+        push: false,
+        sms: false,
       },
-    ];
+    },
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'user_client',
+    email: 'ahmed@premiumhotels.com',
+    password: 'client123',
+    name: 'Ahmed Al-Rashid',
+    avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg',
+    orgId: 'org_123',
+    roles: [
+      { scope: 'org', scopeId: 'org_123', role: 'client' },
+      { scope: 'project', scopeId: 'proj_456', role: 'client' },
+    ],
+    status: 'active',
+    preferences: {
+      theme: 'light',
+      language: 'en',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false,
+      },
+    },
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date(),
+  },
+];
 
-    for (const user of users) {
-      await getContainer(CONTAINERS.USERS).items.create(user);
-    }
-    console.log('✅ Users created');
+// Demo work items
+const workItems = [
+  {
+    id: 'work_001',
+    title: 'Campaign Strategy Development',
+    description: 'Develop comprehensive marketing strategy for luxury hotel chain',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    status: 'in_progress',
+    priority: 'high',
+    assigneeId: 'user_manager',
+    tags: ['strategy', 'planning', 'luxury'],
+    dueDate: new Date('2024-02-15'),
+    estimatedHours: 40,
+    actualHours: 25,
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'work_002',
+    title: 'Market Research Analysis',
+    description: 'Analyze market trends and competitor landscape',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    status: 'completed',
+    priority: 'medium',
+    assigneeId: 'user_analyst',
+    tags: ['research', 'analysis', 'market'],
+    dueDate: new Date('2024-01-30'),
+    estimatedHours: 20,
+    actualHours: 18,
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date('2024-01-28'),
+  },
+];
 
-    // Create demo project
-    const projectId = generateProjectId();
-    const project = {
-      id: projectId,
-      type: 'project',
-      orgId: orgId,
-      name: 'Premium Hotels Group - Q1 2024',
-      clientRef: 'Premium Hotels Group',
-      stages: ['Strategy', 'Content', 'Distribution', 'Ads', 'Insights'],
-      currentStage: 'Distribution',
-      timeline: [
-        {
-          stage: 'Strategy',
-          from: '2024-01-01T00:00:00Z',
-          to: '2024-01-07T23:59:59Z',
-          status: 'done' as const,
-        },
-        {
-          stage: 'Content',
-          from: '2024-01-08T00:00:00Z',
-          to: '2024-01-14T23:59:59Z',
-          status: 'done' as const,
-        },
-        {
-          stage: 'Distribution',
-          from: '2024-01-15T00:00:00Z',
-          to: '2024-01-21T23:59:59Z',
-          status: 'in_progress' as const,
-        },
-        {
-          stage: 'Ads',
-          from: '2024-01-22T00:00:00Z',
-          to: '2024-01-28T23:59:59Z',
-          status: 'pending' as const,
-        },
-        {
-          stage: 'Insights',
-          from: '2024-01-29T00:00:00Z',
-          to: '2024-02-04T23:59:59Z',
-          status: 'pending' as const,
-        },
-      ],
-      kpis: {
-        ctr: 0.048,
-        roi: 3.24,
-        engagement: 0.185,
-        sentiment: 0.78,
-        conversions: 847,
-      },
-      aiTools: [
-        { name: 'Jasper AI', use: 'Copywriting' },
-        { name: 'Midjourney', use: 'Visual Creation' },
-        { name: 'SEMRush', use: 'SEO Analytics' },
-        { name: 'HubSpot AI', use: 'Marketing Automation' },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+// Demo events
+const events = [
+  {
+    id: 'event_001',
+    title: 'Campaign Launch Meeting',
+    description: 'Weekly sync on campaign progress and next steps',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    type: 'meeting',
+    startTime: new Date('2024-02-01T10:00:00Z'),
+    endTime: new Date('2024-02-01T11:00:00Z'),
+    attendees: ['user_admin', 'user_manager', 'user_analyst', 'user_client'],
+    location: 'Virtual',
+    createdAt: new Date('2024-01-25'),
+    updatedAt: new Date(),
+  },
+];
 
-    await getContainer(CONTAINERS.PROJECTS).items.create(project);
-    console.log('✅ Project created');
+// Demo assets
+const assets = [
+  {
+    id: 'asset_001',
+    name: 'Hotel Brand Guidelines',
+    type: 'document',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    url: 'https://storage.googleapis.com/global-next-assets/brand-guidelines.pdf',
+    size: 2048576, // 2MB
+    mimeType: 'application/pdf',
+    tags: ['brand', 'guidelines', 'hotel'],
+    uploadedBy: 'user_client',
+    createdAt: new Date('2024-01-15'),
+    updatedAt: new Date(),
+  },
+];
 
-    // Create demo work items
-    const workItems = [
-      {
-        id: `wi_${nanoid(16)}`,
-        type: 'work_item',
-        orgId: orgId,
-        projectId: projectId,
-        title: 'Create Instagram carousel designs',
-        description: 'Design luxury hotel carousel posts for Instagram feed',
-        status: 'in_progress' as const,
-        priority: 'high' as const,
-        assigneeId: managerUserId,
-        labels: ['content', 'design', 'social'],
-        due: '2024-01-20T23:59:59Z',
-        audit: {
-          createdBy: adminUserId,
-          createdAt: new Date().toISOString(),
-          updates: [],
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: `wi_${nanoid(16)}`,
-        type: 'work_item',
-        orgId: orgId,
-        projectId: projectId,
-        title: 'Optimize Facebook ad targeting',
-        description: 'Review and optimize Facebook ad audience targeting',
-        status: 'todo' as const,
-        priority: 'medium' as const,
-        assigneeId: managerUserId,
-        labels: ['ads', 'optimization'],
-        due: '2024-01-25T23:59:59Z',
-        audit: {
-          createdBy: adminUserId,
-          createdAt: new Date().toISOString(),
-          updates: [],
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: `wi_${nanoid(16)}`,
-        type: 'work_item',
-        orgId: orgId,
-        projectId: projectId,
-        title: 'Generate weekly performance report',
-        description: 'Create comprehensive performance report for client',
-        status: 'done' as const,
-        priority: 'high' as const,
-        assigneeId: adminUserId,
-        labels: ['reporting', 'analytics'],
-        due: '2024-01-18T23:59:59Z',
-        audit: {
-          createdBy: adminUserId,
-          createdAt: new Date().toISOString(),
-          updates: [],
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-
-    for (const workItem of workItems) {
-      await getContainer(CONTAINERS.WORK_ITEMS).items.create(workItem);
-    }
-    console.log('✅ Work items created');
-
-    // Create demo insights
-    const insights = {
-      id: `ins_${nanoid(16)}`,
-      type: 'insight',
-      orgId: orgId,
-      projectId: projectId,
-      kpisTimeSeries: [
-        {
-          t: '2024-01-01T00:00:00Z',
-          ctr: 0.032,
-          roi: 1.8,
-          engagement: 0.12,
-          sentiment: 0.65,
-          conversions: 156,
-        },
-        {
-          t: '2024-01-08T00:00:00Z',
-          ctr: 0.041,
-          roi: 2.4,
-          engagement: 0.15,
-          sentiment: 0.72,
-          conversions: 289,
-        },
-        {
-          t: '2024-01-15T00:00:00Z',
-          ctr: 0.048,
-          roi: 3.24,
-          engagement: 0.185,
-          sentiment: 0.78,
-          conversions: 847,
-        },
-      ],
-      forecasts: {
-        roiNext30d: 3.8,
-        confInt: [3.2, 4.4],
-      },
-      abTests: [
-        {
-          name: 'Ad Copy A vs B',
-          winner: 'B',
-          lift: 0.12,
-        },
-        {
-          name: 'Instagram vs Facebook',
-          winner: 'Instagram',
-          lift: 0.34,
-        },
-      ],
-      sentimentHeatmap: [
-        { channel: 'instagram', score: 0.82 },
-        { channel: 'facebook', score: 0.65 },
-        { channel: 'youtube', score: 0.78 },
-        { channel: 'email', score: 0.89 },
-      ],
+// Demo insights
+const insights = [
+  {
+    id: 'insight_001',
+    title: 'Luxury Hospitality Market Trends',
+    description: 'AI-generated insights on luxury hospitality marketing trends',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    type: 'ai_generated',
+    content: {
+      summary: 'Luxury hospitality sector showing 15% growth in digital engagement',
       recommendations: [
-        {
-          type: 'spend_shift',
-          message: 'Increase Instagram ad budget by 25%',
-          rationale: '34% higher engagement rates compared to Facebook',
-        },
-        {
-          type: 'content_optimization',
-          message: 'Test emotional vs rational messaging',
-          rationale: 'A/B test shows 12% lift with emotional copy',
-        },
+        'Focus on personalized guest experiences',
+        'Leverage social media for luxury brand positioning',
+        'Implement AI-driven customer service solutions',
       ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    await getContainer(CONTAINERS.INSIGHTS).items.create(insights);
-    console.log('✅ Insights created');
-
-    // Create demo messages
-    const messages = [
-      {
-        id: `msg_${nanoid(16)}`,
-        type: 'message',
-        orgId: orgId,
-        projectId: projectId,
-        userId: adminUserId,
-        content: 'Welcome to the Premium Hotels campaign room! Let\'s make this a success.',
-        messageType: 'chat' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+      metrics: {
+        engagement: 15,
+        conversion: 8.5,
+        revenue: 12.3,
       },
-      {
-        id: `msg_${nanoid(16)}`,
-        type: 'message',
-        orgId: orgId,
-        projectId: projectId,
-        userId: managerUserId,
-        content: 'The new Instagram carousel designs are ready for review. AI analysis shows potential 25% increase in CTR.',
-        messageType: 'chat' as const,
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-        updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        id: `msg_${nanoid(16)}`,
-        type: 'message',
-        orgId: orgId,
-        projectId: projectId,
-        userId: clientUserId,
-        content: 'The results are impressive! Our board is very pleased with the 324% ROI. Could we schedule a review meeting?',
-        messageType: 'chat' as const,
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
-        updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      },
-    ];
+    },
+    generatedBy: 'ai',
+    confidence: 0.87,
+    createdAt: new Date('2024-01-20'),
+    updatedAt: new Date(),
+  },
+];
 
-    for (const message of messages) {
-      await getContainer(CONTAINERS.MESSAGES).items.create(message);
-    }
-    console.log('✅ Messages created');
+// Demo messages
+const messages = [
+  {
+    id: 'msg_001',
+    content: 'Great progress on the campaign strategy! The market research insights are very valuable.',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    senderId: 'user_client',
+    type: 'text',
+    attachments: [],
+    createdAt: new Date('2024-01-25'),
+    updatedAt: new Date(),
+  },
+];
 
-    // Create demo tool inventory
-    const toolInventory = [
-      {
-        id: `tool_${nanoid(16)}`,
-        type: 'tool_inventory',
-        orgId: orgId,
-        name: 'Jasper AI',
-        category: 'Copywriting',
-        status: 'active' as const,
-        seats: 10,
-        usedSeats: 8,
-        usageLogs: [
-          {
-            userId: adminUserId,
-            action: 'login',
-            timestamp: new Date().toISOString(),
-          },
-          {
-            userId: managerUserId,
-            action: 'generate_content',
-            timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          },
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: `tool_${nanoid(16)}`,
-        type: 'tool_inventory',
-        orgId: orgId,
-        name: 'Midjourney',
-        category: 'Visual Creation',
-        status: 'active' as const,
-        seats: 5,
-        usedSeats: 3,
-        usageLogs: [
-          {
-            userId: managerUserId,
-            action: 'generate_image',
-            timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-          },
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: `tool_${nanoid(16)}`,
-        type: 'tool_inventory',
-        orgId: orgId,
-        name: 'SEMRush',
-        category: 'SEO Analytics',
-        status: 'active' as const,
-        seats: 3,
-        usedSeats: 2,
-        usageLogs: [
-          {
-            userId: adminUserId,
-            action: 'keyword_research',
-            timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-          },
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
+// Demo approvals
+const approvals = [
+  {
+    id: 'approval_001',
+    title: 'Campaign Budget Approval',
+    description: 'Approval for additional $10,000 budget allocation',
+    projectId: 'proj_456',
+    orgId: 'org_123',
+    type: 'budget',
+    status: 'pending',
+    requestedBy: 'user_manager',
+    requestedFor: 'user_admin',
+    amount: 10000,
+    currency: 'USD',
+    dueDate: new Date('2024-02-05'),
+    createdAt: new Date('2024-01-28'),
+    updatedAt: new Date(),
+  },
+];
 
-    for (const tool of toolInventory) {
-      await getContainer(CONTAINERS.TOOL_INVENTORY).items.create(tool);
-    }
-    console.log('✅ Tool inventory created');
+// Demo tool inventory
+const toolInventory = [
+  {
+    id: 'tool_001',
+    name: 'AI Content Generator',
+    description: 'Generate marketing content using AI',
+    category: 'content',
+    status: 'active',
+    orgId: 'org_123',
+    settings: {
+      enabled: true,
+      autoGenerate: true,
+      quality: 'high',
+    },
+    usage: {
+      totalRequests: 150,
+      successfulRequests: 142,
+      lastUsed: new Date('2024-01-30'),
+    },
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+  },
+];
 
-    console.log('🎉 Database seeding completed successfully!');
-    console.log('\n📊 Demo Data Summary:');
-    console.log(`- Organization: ${organization.name} (${orgId})`);
-    console.log(`- Users: ${users.length} (admin, manager, client)`);
-    console.log(`- Project: ${project.name} (${projectId})`);
-    console.log(`- Work Items: ${workItems.length}`);
-    console.log(`- Messages: ${messages.length}`);
-    console.log(`- AI Tools: ${toolInventory.length}`);
-    console.log('\n🔑 Demo Login Credentials:');
-    console.log('Admin: admin@globalnextconsulting.com');
-    console.log('Manager: manager@globalnextconsulting.com');
-    console.log('Client: ahmed@premiumhotels.com');
+export const seedData = {
+  organizations,
+  projects,
+  users,
+  workItems,
+  events,
+  assets,
+  insights,
+  messages,
+  approvals,
+  toolInventory,
+};
 
-  } catch (error) {
-    console.error('❌ Error seeding database:', error);
-    process.exit(1);
-  }
-}
-
-// Run if called directly
-if (require.main === module) {
-  seedDatabase();
-}
-
-export { seedDatabase };
+// Export individual collections for easy access
+export {
+  organizations,
+  projects,
+  users,
+  workItems,
+  events,
+  assets,
+  insights,
+  messages,
+  approvals,
+  toolInventory,
+};

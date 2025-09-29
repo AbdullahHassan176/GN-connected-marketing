@@ -3,7 +3,10 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { ThemeProvider } from 'next-themes';
 import { Providers } from './providers';
+import { MainLayout } from '@/components/layout/main-layout';
+import { RTLProvider } from '@/components/rtl-layout';
 import './globals.css';
+import '../styles/rtl.css';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -42,7 +45,11 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <Providers>
-              {children}
+              <RTLProvider>
+                <MainLayout>
+                  {children}
+                </MainLayout>
+              </RTLProvider>
             </Providers>
           </ThemeProvider>
         </NextIntlClientProvider>

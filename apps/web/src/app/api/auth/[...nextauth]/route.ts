@@ -12,7 +12,10 @@ const demoUsers = [
     name: 'Sarah Mitchell',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'owner' as const }],
+    roles: [
+      { scope: 'org' as const, scopeId: 'org_123', role: 'owner' as const },
+      { scope: 'project' as const, scopeId: 'proj_456', role: 'admin' as const },
+    ],
     status: 'active' as const,
   },
   {
@@ -22,7 +25,23 @@ const demoUsers = [
     name: 'Marcus Chen',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'manager' as const }],
+    roles: [
+      { scope: 'org' as const, scopeId: 'org_123', role: 'manager' as const },
+      { scope: 'project' as const, scopeId: 'proj_456', role: 'manager' as const },
+    ],
+    status: 'active' as const,
+  },
+  {
+    id: 'user_analyst',
+    email: 'analyst@globalnextconsulting.com',
+    password: 'analyst123',
+    name: 'Emma Rodriguez',
+    avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg',
+    orgId: 'org_123',
+    roles: [
+      { scope: 'org' as const, scopeId: 'org_123', role: 'analyst' as const },
+      { scope: 'project' as const, scopeId: 'proj_456', role: 'analyst' as const },
+    ],
     status: 'active' as const,
   },
   {
@@ -32,7 +51,10 @@ const demoUsers = [
     name: 'Ahmed Al-Rashid',
     avatarUrl: 'https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg',
     orgId: 'org_123',
-    roles: [{ scope: 'org' as const, scopeId: 'org_123', role: 'client' as const }],
+    roles: [
+      { scope: 'org' as const, scopeId: 'org_123', role: 'client' as const },
+      { scope: 'project' as const, scopeId: 'proj_456', role: 'client' as const },
+    ],
     status: 'active' as const,
   },
 ];
@@ -87,6 +109,26 @@ const handler = NextAuth({
         token.roles = user.roles;
         token.status = user.status;
       }
+      
+      // Handle OAuth providers
+      if (account?.provider === 'google' || account?.provider === 'microsoft') {
+        // For OAuth users, assign default roles
+        const oauthUser = demoUsers.find(u => u.email === user?.email);
+        if (oauthUser) {
+          token.orgId = oauthUser.orgId;
+          token.roles = oauthUser.roles;
+          token.status = oauthUser.status;
+        } else {
+          // Default roles for new OAuth users
+          token.orgId = 'org_123';
+          token.roles = [
+            { scope: 'org', scopeId: 'org_123', role: 'client' },
+            { scope: 'project', scopeId: 'proj_456', role: 'client' },
+          ];
+          token.status = 'active';
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
@@ -97,6 +139,10 @@ const handler = NextAuth({
         session.user.status = token.status as 'active' | 'inactive' | 'suspended';
       }
       return session;
+    },
+    async signIn({ user, account, profile }) {
+      // Allow all sign-ins for demo purposes
+      return true;
     },
   },
   pages: {

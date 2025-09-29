@@ -6,6 +6,7 @@
   "files": [
     "eslint.js",
     "tailwind.js",
+    "tailwind-preset.js",
     "typescript.js"
   ],
   "dependencies": {

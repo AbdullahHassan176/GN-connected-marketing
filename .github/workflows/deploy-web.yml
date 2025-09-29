@@ -1,0 +1,262 @@
+name: Deploy Web App to Azure Static Web Apps
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-web.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+
+env:
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8'
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: |
+          cd apps/web
+          pnpm run lint
+
+      - name: Typecheck
+        run: |
+          cd apps/web
+          pnpm run typecheck
+
+  build:
+    name: Build Web App
+    runs-on: ubuntu-latest
+    needs: lint-and-typecheck
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: |
+          cd packages/ui
+          pnpm run build
+          cd ../lib
+          pnpm run build
+
+      - name: Build web app
+        run: |
+          cd apps/web
+          pnpm run build
+        env:
+          NEXTAUTH_URL: ${{ github.ref == 'refs/heads/main' && 'https://global-next-prod.azurestaticapps.net' || 'https://global-next-staging.azurestaticapps.net' }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+
+  test-e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: |
+          cd apps/web
+          npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: |
+          cd apps/web
+          pnpm run test:e2e
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ github.ref == 'refs/heads/main' && 'https://global-next-prod.azurestaticapps.net' || 'https://global-next-staging.azurestaticapps.net' }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/web/test-results/
+          retention-days: 30
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/.next
+          retention-days: 1
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/.next
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_STAGING }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          app_location: 'apps/web'
+          output_location: '.next'
+          skip_app_build: true
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: apps/web/.next
+
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PRODUCTION }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          app_location: 'apps/web'
+          output_location: '.next'
+          skip_app_build: true
+
+  seed-staging:
+    name: Seed Staging Database
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          pnpm install --frozen-lockfile
+
+      - name: Seed staging database
+        run: |
+          cd apps/api
+          pnpm run seed:staging
+        env:
+          COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT_STAGING }}
+          COSMOS_DB_KEY: ${{ secrets.COSMOS_DB_KEY_STAGING }}
+          COSMOS_DB_DATABASE_ID: ${{ secrets.COSMOS_DB_DATABASE_ID_STAGING }}
+
+  seed-production:
+    name: Seed Production Database
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/api
+          pnpm install --frozen-lockfile
+
+      - name: Seed production database
+        run: |
+          cd apps/api
+          pnpm run seed:production
+        env:
+          COSMOS_DB_ENDPOINT: ${{ secrets.COSMOS_DB_ENDPOINT_PRODUCTION }}
+          COSMOS_DB_KEY: ${{ secrets.COSMOS_DB_KEY_PRODUCTION }}
+          COSMOS_DB_DATABASE_ID: ${{ secrets.COSMOS_DB_DATABASE_ID_PRODUCTION }}

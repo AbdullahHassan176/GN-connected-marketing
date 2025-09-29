@@ -4,7 +4,7 @@
     "applicationInsights": {
       "samplingSettings": {
         "isEnabled": true,
-        "maxTelemetryItemsPerSecond": 5
+        "excludedTypes": "Request"
       }
     }
   },
@@ -13,10 +13,23 @@
     "version": "[4.*, 5.0.0)"
   },
   "functionTimeout": "00:05:00",
-  "httpWorker": {
-    "description": {
-      "defaultExecutablePath": "node",
-      "defaultWorkerPath": "dist/index.js"
-    }
+  "http": {
+    "routePrefix": "api",
+    "maxOutstandingRequests": 200,
+    "maxConcurrentRequests": 100,
+    "dynamicThrottlesEnabled": true
+  },
+  "retry": {
+    "strategy": "exponentialBackoff",
+    "maxRetryCount": 3,
+    "minimumInterval": "00:00:02",
+    "maximumInterval": "00:00:30"
+  },
+  "healthMonitor": {
+    "enabled": true,
+    "healthCheckInterval": "00:00:10",
+    "healthCheckWindow": "00:02:00",
+    "healthCheckThreshold": 6,
+    "counterThreshold": 0.80
   }
 }

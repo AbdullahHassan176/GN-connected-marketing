@@ -12,9 +12,11 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "lint": "turbo run lint",
-    "type-check": "turbo run type-check",
+    "typecheck": "turbo run type-check",
     "clean": "turbo run clean",
-    "db:seed": "tsx packages/lib/scripts/seed.ts",
+    "seed": "tsx packages/lib/scripts/seed-mock.ts",
+    "db:seed": "tsx packages/lib/scripts/seed-mock.ts",
+    "db:clear": "tsx packages/lib/scripts/clear-db.ts",
     "db:reset": "tsx packages/lib/scripts/reset.ts"
   },
   "devDependencies": {
