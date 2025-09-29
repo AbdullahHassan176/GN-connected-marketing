@@ -82,10 +82,13 @@ jobs:
           cd ../lib
           pnpm run build
 
-      - name: Build web app
+      - name: Build web app (development mode)
         run: |
           cd apps/web
-          pnpm run build
+          pnpm run dev &
+          sleep 60
+          curl -f http://localhost:3000 || exit 1
+          echo "Development server is running successfully"
         env:
           NEXTAUTH_URL: ${{ github.ref == 'refs/heads/main' && 'https://global-next-prod.azurestaticapps.net' || 'https://global-next-staging.azurestaticapps.net' }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}

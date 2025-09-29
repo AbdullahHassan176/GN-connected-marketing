@@ -128,7 +128,7 @@ export default function AutomationPage() {
 
   const automationColumns = [
     {
-      key: 'name',
+      key: 'name' as const,
       label: 'Name',
       sortable: true,
       render: (value: string, row: any) => (
@@ -141,7 +141,7 @@ export default function AutomationPage() {
       )
     },
     {
-      key: 'status',
+      key: 'status' as const,
       label: 'Status',
       render: (value: string) => (
         <Badge variant={value === 'active' ? 'default' : 'secondary'}>
@@ -150,7 +150,7 @@ export default function AutomationPage() {
       )
     },
     {
-      key: 'trigger',
+      key: 'trigger' as const,
       label: 'Trigger',
       render: (value: string) => (
         <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
@@ -159,14 +159,14 @@ export default function AutomationPage() {
       )
     },
     {
-      key: 'triggerCount',
+      key: 'triggerCount' as const,
       label: 'Triggers',
       render: (value: number) => (
         <span className="font-medium">{value}</span>
       )
     },
     {
-      key: 'lastTriggered',
+      key: 'lastTriggered' as const,
       label: 'Last Triggered',
       render: (value: string) => (
         <span className="text-sm text-gray-500">
@@ -211,7 +211,7 @@ export default function AutomationPage() {
 
   const integrationColumns = [
     {
-      key: 'name',
+      key: 'name' as const,
       label: 'Integration',
       sortable: true,
       render: (value: string, row: any) => (
@@ -224,14 +224,14 @@ export default function AutomationPage() {
       )
     },
     {
-      key: 'type',
+      key: 'type' as const,
       label: 'Type',
       render: (value: string) => (
         <Badge variant="outline">{value}</Badge>
       )
     },
     {
-      key: 'status',
+      key: 'status' as const,
       label: 'Status',
       render: (value: string) => (
         <Badge variant={value === 'connected' ? 'default' : 'secondary'}>
@@ -240,14 +240,14 @@ export default function AutomationPage() {
       )
     },
     {
-      key: 'usageCount',
+      key: 'usageCount' as const,
       label: 'Usage',
       render: (value: number) => (
         <span className="font-medium">{value} times</span>
       )
     },
     {
-      key: 'lastUsed',
+      key: 'lastUsed' as const,
       label: 'Last Used',
       render: (value: string) => (
         <span className="text-sm text-gray-500">
